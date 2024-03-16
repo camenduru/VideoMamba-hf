@@ -6,7 +6,7 @@ packaging
 pytest
 setuptools
 timm
-torch==2.1.1+cu118
-torchvision==0.16.1+cu118
 transformers
 wheel
+torch==2.1.1+cu118 --find-links https://download.pytorch.org/whl/cu118
+torchvision==0.16.1+cu118 --find-links https://download.pytorch.org/whl/cu118
