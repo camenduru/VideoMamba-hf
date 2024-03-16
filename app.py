@@ -1,11 +1,12 @@
 import os
-import spaces
+# import spaces
 
 # install packages for mamba
 def install():
     print("Install personal packages", flush=True)
-    os.system("pip install causal_conv1d-1.0.0-cp310-cp310-linux_x86_64.whl")
-    os.system("pip install mamba_ssm-1.0.1-cp310-cp310-linux_x86_64.whl")
+    # os.system("pip install causal_conv1d-1.0.0-cp310-cp310-linux_x86_64.whl")
+    # os.system("pip install mamba_ssm-1.0.1-cp310-cp310-linux_x86_64.whl")
+    os.system("bash install.sh")
 
 install()
 
@@ -91,7 +92,7 @@ def load_video(video_path):
     return torch_imgs
     
 
-@spaces.GPU
+# @spaces.GPU
 def inference_video(video):
     vid = load_video(video)
     
@@ -110,7 +111,7 @@ def set_example_video(example: list) -> dict:
     return gr.Video.update(value=example[0])
 
 
-@spaces.GPU
+# @spaces.GPU
 def inference_image(img):
     image = img
     image_transform = T.Compose(
