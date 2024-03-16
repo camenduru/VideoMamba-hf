@@ -1,8 +1,13 @@
 import os
+import spaces
 
 # install packages for mamba
-print("Install personal packages", flush=True)
-os.system("bash install.sh")
+@spaces.GPU
+def install():
+    print("Install personal packages", flush=True)
+    os.system("bash install.sh")
+
+install()
 
 import torch
 import torch.nn as nn
@@ -23,7 +28,6 @@ from transforms import (
 
 import gradio as gr
 from huggingface_hub import hf_hub_download
-
 
 
 # Device on which to run the model
@@ -87,6 +91,7 @@ def load_video(video_path):
     return torch_imgs
     
 
+@spaces.GPU
 def inference_video(video):
     vid = load_video(video)
     
@@ -105,6 +110,7 @@ def set_example_video(example: list) -> dict:
     return gr.Video.update(value=example[0])
 
 
+@spaces.GPU
 def inference_image(img):
     image = img
     image_transform = T.Compose(
@@ -141,30 +147,30 @@ with demo:
     )
 
     with gr.Tab("Video"):
-        with gr.Box():
-            with gr.Row():
-                with gr.Column():
-                    with gr.Row():
-                        input_video = gr.Video(label='Input Video').style(height=360)
-                    with gr.Row():
-                        submit_video_button = gr.Button('Submit')
-                with gr.Column():
-                        label_video = gr.Label(num_top_classes=5)
-            with gr.Row():
-                example_videos = gr.Dataset(components=[input_video], samples=[['./videos/hitting_baseball.mp4'], ['./videos/hoverboarding.mp4'], ['./videos/yoga.mp4']])
+        # with gr.Box():
+        with gr.Row():
+            with gr.Column():
+                with gr.Row():
+                    input_video = gr.Video(label='Input Video').style(height=360)
+                with gr.Row():
+                    submit_video_button = gr.Button('Submit')
+            with gr.Column():
+                    label_video = gr.Label(num_top_classes=5)
+        with gr.Row():
+            example_videos = gr.Dataset(components=[input_video], samples=[['./videos/hitting_baseball.mp4'], ['./videos/hoverboarding.mp4'], ['./videos/yoga.mp4']])
         
     with gr.Tab("Image"):
-        with gr.Box():
-            with gr.Row():
-                with gr.Column():
-                    with gr.Row():
-                        input_image = gr.Image(label='Input Image', type='pil').style(height=360)
-                    with gr.Row():
-                        submit_image_button = gr.Button('Submit')
-                with gr.Column():
-                    label_image = gr.Label(num_top_classes=5)
-            with gr.Row():
-                example_images = gr.Dataset(components=[input_image], samples=[['./images/cat.png'], ['./images/dog.png'], ['./images/panda.png']])
+        # with gr.Box():
+        with gr.Row():
+            with gr.Column():
+                with gr.Row():
+                    input_image = gr.Image(label='Input Image', type='pil').style(height=360)
+                with gr.Row():
+                    submit_image_button = gr.Button('Submit')
+            with gr.Column():
+                label_image = gr.Label(num_top_classes=5)
+        with gr.Row():
+            example_images = gr.Dataset(components=[input_image], samples=[['./images/cat.png'], ['./images/dog.png'], ['./images/panda.png']])
 
     gr.Markdown(
         """
@@ -173,9 +179,9 @@ with demo:
     )
 
     submit_video_button.click(fn=inference_video, inputs=input_video, outputs=label_video)
-    example_videos.click(fn=set_example_video, inputs=example_videos, outputs=example_videos.components)
+    example_videos.click(fn=set_example_video, inputs=example_videos, outputs=example_videos._components)
     submit_image_button.click(fn=inference_image, inputs=input_image, outputs=label_image)
-    example_images.click(fn=set_example_image, inputs=example_images, outputs=example_images.components)
+    example_images.click(fn=set_example_image, inputs=example_images, outputs=example_images._components)
 
 demo.launch(enable_queue=True)
 # demo.launch(server_name="0.0.0.0", server_port=10034, enable_queue=True)
