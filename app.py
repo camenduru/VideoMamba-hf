@@ -2,10 +2,9 @@ import os
 import spaces
 
 # install packages for mamba
-@spaces.GPU
 def install():
     print("Install personal packages", flush=True)
-    os.system("bash install.sh")
+    os.system("pip install mamba_ssm-1.0.1-cp310-cp310-linux_x86_64.whl")
 
 install()
 
