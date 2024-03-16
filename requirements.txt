@@ -5,9 +5,9 @@ numpy
 packaging
 pytest
 setuptools
-skimage
 timm
 torch
 torchvision
 transformers
 wheel
+
