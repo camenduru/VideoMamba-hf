@@ -410,34 +410,3 @@ class IdentityTransform(object):
 
     def __call__(self, data):
         return data
-
-
-if __name__ == "__main__":
-    trans = torchvision.transforms.Compose([
-        GroupScale(256),
-        GroupRandomCrop(224),
-        Stack(),
-        ToTorchFormatTensor(),
-        GroupNormalize(
-            mean=[.485, .456, .406],
-            std=[.229, .224, .225]
-        )]
-    )
-
-    im = Image.open('../tensorflow-model-zoo.torch/lena_299.png')
-
-    color_group = [im] * 3
-    rst = trans(color_group)
-
-    gray_group = [im.convert('L')] * 9
-    gray_rst = trans(gray_group)
-
-    trans2 = torchvision.transforms.Compose([
-        GroupRandomSizedCrop(256),
-        Stack(),
-        ToTorchFormatTensor(),
-        GroupNormalize(
-            mean=[.485, .456, .406],
-            std=[.229, .224, .225])
-    ])
-    print(trans2(color_group))
