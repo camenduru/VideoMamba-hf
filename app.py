@@ -1,5 +1,9 @@
 import os
 
+# install packages for mamba
+print("Install personal packages", flush=True)
+os.system("bash install.sh")
+
 import torch
 import torch.nn as nn
 import numpy as np
@@ -20,9 +24,6 @@ from transforms import (
 import gradio as gr
 from huggingface_hub import hf_hub_download
 
-
-# install packages for mamba
-os.system("bash install.sh")
 
 
 # Device on which to run the model
