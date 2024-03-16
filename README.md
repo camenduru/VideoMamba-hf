@@ -1,10 +1,10 @@
 ---
 title: VideoMamba
-emoji: 🌖
-colorFrom: gray
-colorTo: pink
+emoji: 🐍
+colorFrom: blue
+colorTo: green
 sdk: gradio
-sdk_version: 4.21.0
+sdk_version: 3.29.0
 app_file: app.py
 pinned: false
 license: apache-2.0
