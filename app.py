@@ -1,5 +1,10 @@
 import os
 # import spaces
+import torch
+
+os.system("nvidia-smi")
+print("TORCH_CUDA", torch.cuda.is_available())
+
 
 # install packages for mamba
 def install():
@@ -10,7 +15,6 @@ def install():
 
 install()
 
-import torch
 import torch.nn as nn
 import numpy as np
 import torch.nn.functional as F
