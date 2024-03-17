@@ -75,8 +75,8 @@ def load_video(video_path):
     frame_indices = get_index(num_frames, 16)
 
     # transform
-    crop_size = 160
-    scale_size = 160
+    crop_size = 224
+    scale_size = 224
     input_mean = [0.485, 0.456, 0.406]
     input_std = [0.229, 0.224, 0.225]
 
