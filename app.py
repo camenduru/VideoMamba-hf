@@ -9,8 +9,6 @@ print("TORCH_CUDA", torch.cuda.is_available())
 # install packages for mamba
 def install():
     print("Install personal packages", flush=True)
-    # os.system("pip install causal_conv1d-1.0.0-cp310-cp310-linux_x86_64.whl")
-    # os.system("pip install mamba_ssm-1.0.1-cp310-cp310-linux_x86_64.whl")
     os.system("bash install.sh")
 
 install()
