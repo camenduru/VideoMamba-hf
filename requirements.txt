@@ -8,5 +8,6 @@ setuptools
 timm
 transformers
 wheel
-# torch --index-url https://download.pytorch.org/whl/cu118
-# torchvision --index-url https://download.pytorch.org/whl/cu118
+--extra-index-url https://download.pytorch.org/whl/cu118
+torch==2.1.1
+torchvision==0.16.1

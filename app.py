@@ -1,15 +1,13 @@
-import os
-# import spaces
+import shlex
+import subprocess
+import spaces
 import torch
-
-os.system("nvidia-smi")
-print("TORCH_CUDA", torch.cuda.is_available())
-
 
 # install packages for mamba
 def install():
     print("Install personal packages", flush=True)
-    os.system("bash install.sh")
+    subprocess.run(shlex.split("pip install causal_conv1d-1.0.0-cp310-cp310-linux_x86_64.whl"))
+    subprocess.run(shlex.split("pip install mamba_ssm-1.0.1-cp310-cp310-linux_x86_64.whl"))
 
 install()
 
@@ -25,7 +23,7 @@ from videomamba_video import videomamba_tiny
 from kinetics_class_index import kinetics_classnames
 from imagenet_class_index import imagenet_classnames
 from transforms import (
-    GroupNormalize, GroupScale, GroupCenterCrop, 
+    GroupNormalize, GroupScale, GroupCenterCrop,
     Stack, ToTorchFormatTensor
 )
 
@@ -38,7 +36,7 @@ from huggingface_hub import hf_hub_download
 device = "cuda"
 model_video_path = hf_hub_download(repo_id="OpenGVLab/VideoMamba", filename="videomamba_t16_k400_f16_res224.pth")
 model_image_path = hf_hub_download(repo_id="OpenGVLab/VideoMamba", filename="videomamba_t16_in1k_res224.pth")
-# Pick a pretrained model 
+# Pick a pretrained model
 model_video = videomamba_tiny(num_classes=400, num_frames=16)
 video_sd = torch.load(model_video_path, map_location='cpu')
 model_video.load_state_dict(video_sd)
@@ -55,7 +53,7 @@ for k, v in kinetics_classnames.items():
     kinetics_id_to_classname[k] = v
 imagenet_id_to_classname = {}
 for k, v in imagenet_classnames.items():
-    imagenet_id_to_classname[k] = v[1] 
+    imagenet_id_to_classname[k] = v[1]
 
 
 def get_index(num_frames, num_segments=8):
@@ -83,7 +81,7 @@ def load_video(video_path):
         GroupCenterCrop(crop_size),
         Stack(),
         ToTorchFormatTensor(),
-        GroupNormalize(input_mean, input_std) 
+        GroupNormalize(input_mean, input_std)
     ])
 
     images_group = list()
@@ -92,28 +90,24 @@ def load_video(video_path):
         images_group.append(img)
     torch_imgs = transform(images_group)
     return torch_imgs
-    
 
-# @spaces.GPU
+
+@spaces.GPU
 def inference_video(video):
     vid = load_video(video)
-    
+
     # The model expects inputs of shape: B x C x H x W
     TC, H, W = vid.shape
     inputs = vid.reshape(1, TC//3, 3, H, W).permute(0, 2, 1, 3, 4)
-    
+
     with torch.no_grad():
         prediction = model_video(inputs.to(device))
         prediction = F.softmax(prediction, dim=1).flatten()
 
     return {kinetics_id_to_classname[str(i)]: float(prediction[i]) for i in range(400)}
-    
-
-def set_example_video(example: list) -> dict:
-    return gr.Video.update(value=example[0])
 
 
-# @spaces.GPU
+@spaces.GPU
 def inference_image(img):
     image = img
     image_transform = T.Compose(
@@ -125,19 +119,15 @@ def inference_image(img):
     ]
     )
     image = image_transform(image)
-    
+
     # The model expects inputs of shape: B x C x H x W
     image = image.unsqueeze(0)
-    
+
     with torch.no_grad():
         prediction = model_image(image.to(device))
         prediction = F.softmax(prediction, dim=1).flatten()
 
     return {imagenet_id_to_classname[str(i)]: float(prediction[i]) for i in range(1000)}
-
-
-def set_example_image(example: list) -> dict:
-    return gr.Image.update(value=example[0])
 
 
 demo = gr.Blocks()
@@ -154,26 +144,26 @@ with demo:
         with gr.Row():
             with gr.Column():
                 with gr.Row():
-                    input_video = gr.Video(label='Input Video').style(height=360)
+                    input_video = gr.Video(label='Input Video', height=360)
                 with gr.Row():
                     submit_video_button = gr.Button('Submit')
             with gr.Column():
                     label_video = gr.Label(num_top_classes=5)
         with gr.Row():
-            example_videos = gr.Dataset(components=[input_video], samples=[['./videos/hitting_baseball.mp4'], ['./videos/hoverboarding.mp4'], ['./videos/yoga.mp4']])
-        
+            gr.Examples(examples=['./videos/hitting_baseball.mp4', './videos/hoverboarding.mp4', './videos/yoga.mp4'], inputs=input_video, outputs=label_video, fn=inference_video, cache_examples=True)
+
     with gr.Tab("Image"):
         # with gr.Box():
         with gr.Row():
             with gr.Column():
                 with gr.Row():
-                    input_image = gr.Image(label='Input Image', type='pil').style(height=360)
+                    input_image = gr.Image(label='Input Image', type='pil', height=360)
                 with gr.Row():
                     submit_image_button = gr.Button('Submit')
             with gr.Column():
                 label_image = gr.Label(num_top_classes=5)
         with gr.Row():
-            example_images = gr.Dataset(components=[input_image], samples=[['./images/cat.png'], ['./images/dog.png'], ['./images/panda.png']])
+            gr.Examples(examples=['./images/cat.png', './images/dog.png', './images/panda.png'], inputs=input_image, outputs=label_image, fn=inference_image, cache_examples=True)
 
     gr.Markdown(
         """
@@ -182,9 +172,6 @@ with demo:
     )
 
     submit_video_button.click(fn=inference_video, inputs=input_video, outputs=label_video)
-    example_videos.click(fn=set_example_video, inputs=example_videos, outputs=example_videos._components)
     submit_image_button.click(fn=inference_image, inputs=input_image, outputs=label_image)
-    example_images.click(fn=set_example_image, inputs=example_images, outputs=example_images._components)
 
-demo.launch(enable_queue=True)
-# demo.launch(server_name="0.0.0.0", server_port=10034, enable_queue=True)
+demo.queue(max_size=20).launch()
