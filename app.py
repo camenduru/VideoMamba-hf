@@ -1,6 +1,5 @@
 import shlex
 import subprocess
-import spaces
 import torch
 
 # install packages for mamba
@@ -92,7 +91,6 @@ def load_video(video_path):
     return torch_imgs
 
 
-@spaces.GPU
 def inference_video(video):
     vid = load_video(video)
 
@@ -107,7 +105,6 @@ def inference_video(video):
     return {kinetics_id_to_classname[str(i)]: float(prediction[i]) for i in range(400)}
 
 
-@spaces.GPU
 def inference_image(img):
     image = img
     image_transform = T.Compose(
