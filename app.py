@@ -174,4 +174,4 @@ with demo:
     submit_video_button.click(fn=inference_video, inputs=input_video, outputs=label_video)
     submit_image_button.click(fn=inference_image, inputs=input_image, outputs=label_image)
 
-demo.queue(max_size=20).launch()
+demo.queue(max_size=20).launch(share=True)
